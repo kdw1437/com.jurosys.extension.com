@@ -37,15 +37,34 @@ public class ProcessPrices {
                 priceObject.put("baseDt", result.getValue(i, "baseDt", ""));
                 priceObject.put("dataSetId", result.getValue(i, "dataSetId", ""));
                 priceObject.put("dataId", result.getValue(i, "dataId", ""));
-                priceObject.put("currency", result.getValue(i, "currency", ""));
-                priceObject.put("baseCurrency", result.getValue(i, "baseCurrency", ""));
+                //priceObject.put("currency", result.getValue(i, "currency", ""));
+                String currencyStr = result.getValue(i, "currency", "");
+                if (!currencyStr.isEmpty()) {
+                    priceObject.put("currency", currencyStr);
+                } else {
+                    priceObject.put("currency", JSONObject.NULL);  // Set to null if empty
+                }
+                //priceObject.put("baseCurrency", result.getValue(i, "baseCurrency", ""));
+                String baseCurrencyStr = result.getValue(i, "baseCurrency", "");
+                if (!baseCurrencyStr.isEmpty()) {
+                    priceObject.put("baseCurrency", baseCurrencyStr);
+                } else {
+                    priceObject.put("baseCurrency", JSONObject.NULL);
+                }
                 //priceObject.put("price", result.getValue(i, "price", ""));
 
                 String priceStr = result.getValue(i, "price", "");
-                double priceNum = Double.parseDouble(priceStr);  // Converts string to double
-                priceObject.put("price", priceNum);  // Automatically uses numeric JSON representation
+                
+                if (!priceStr.isEmpty()) {
+                	double priceNum = Double.parseDouble(priceStr);  // Converts string to double
+                	priceObject.put("price", priceNum);  // Automatically uses numeric JSON representation
+                } else {
+                	priceObject.put("price", JSONObject.NULL);
+                }
                 pricesArray.put(priceObject);
-            }
+                
+                
+                }
 
             finalJson.put("prices", pricesArray);
             Map<String, Object> hashMap = finalJson.toMap();
