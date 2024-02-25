@@ -15,20 +15,30 @@ public class ProcessYieldCurves2 {
 
     public void execute(DaoService dao) {
         try {
+        	String currentBaseDt = dao.getStringValue("baseDt");
+            String currentDataIds = dao.getStringValue("dataIds");
+        	
+            String getParamBaseDt = dao.getParam().getMap().get("baseDt").toString();
+            String getParamDataIds = dao.getParam().getMap().get("dataIds").toString(); 
+            //위의 getStringValue method와 getParam().getMap().get().toString()이 같은 결과가 나온다.
+            log.info(currentBaseDt);
+            log.info(currentDataIds);
+            log.info(getParamBaseDt);
+            log.info(getParamDataIds);
         	// Validation Check (다음주 월요일 까지 완성하도록 하기)
         	String errorMsg = ""; //error message 빈 string에 error Message 내용을 추가해주도록 하기. 고로 error가 걸릴 경우, errorMsg string에 error 내용을 추가해주고, error내용을 retrun
         	//Exception 새로운 클래스를 짜서, Exception클래스 상속받아서 사용하는 것은 지양하도록 하기.
         	//illegalArgumentException학습해서 처리하기. Exception새로운 클래스를 만들어서 사용하지 말고, illegalArgumentException 사용하도록 하기.
         	//1. baseDt가 null인 경우
-        	if( dao.getParam().getMap().get("baseDt") == null){
-        		//err
-        	}
+            if (currentBaseDt == null || currentBaseDt.isEmpty()) {
+                throw new IllegalArgumentException("baseDt가 null이나 empty이다.");
+            }
         	
         	//2. dataIds가 null인 경우
-        	if(dao.getParam().getMap().get("baseDt") == null || dao.getParam().getMap().get("dataIds").equals(""))	{
-        		
-        	}
-        	//3. 위에가 있어도 결과물이 없는 경우 (dataIds=빈 경우)
+            if (currentDataIds == null || currentDataIds.isEmpty()) {
+                throw new IllegalArgumentException("dataIds가 null이나 empty이다.");
+            }
+        	//3. 위에가 있어도 결과물이 없는 경우 (dataIds=빈 경우) <<위의 경우에 포함되어 있음.
         	//4. 결과물이 있는 데, 결과물에 해당하는 내용이 없을 경우 (dataIds = KRSIRSZ<<이런 경우) <<이 경우는 rowSize에서 처리하도록 한다.
             // SQL query 실행
             dao.sqlexe("s_selectYieldCurves3", false); // sqlquery ID
@@ -40,7 +50,7 @@ public class ProcessYieldCurves2 {
                 dao.setValue("response", errorJson.toMap()); //errorJson을 HashMap객체로 바꿔준 뒤에, response로 설정한다.
                 log.info(errorJson.toString()); // error message 로그를 console에 남긴다.
                 //return; // execute 메소드를 빠져 나간다.
-                throw new IllegalArgumentException();        
+                throw new IllegalArgumentException("dataIds나 baseDt를 제대로 입력하지 않았습니다.");        
             }
             
             if (result.rowSize() == 0 && dao.getParam().getMap().get("dataIds") == null) {
@@ -106,7 +116,8 @@ public class ProcessYieldCurves2 {
             log.error("Error processing yield curves", e);
             dao.setError("Error processing yield curves: " + e.getMessage());
 		} catch (IllegalArgumentException e) {
-			dao.setError("baseDt를 입력하세요");
+			log.error("Validation error: " + e.getMessage(), e);
+			dao.setError(e.getMessage());
 		}
     }
 
