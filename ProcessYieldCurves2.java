@@ -18,24 +18,24 @@ public class ProcessYieldCurves2 {
         	String currentBaseDt = dao.getStringValue("baseDt");
             String currentDataIds = dao.getStringValue("dataIds");
         	
-            String getParamBaseDt = dao.getParam().getMap().get("baseDt").toString();
-            String getParamDataIds = dao.getParam().getMap().get("dataIds").toString(); 
+            //String getParamBaseDt = dao.getParam().getMap().get("baseDt").toString();
+            //String getParamDataIds = dao.getParam().getMap().get("dataIds").toString(); 
             //위의 getStringValue method와 getParam().getMap().get().toString()이 같은 결과가 나온다.
             log.info(currentBaseDt);
             log.info(currentDataIds);
-            log.info(getParamBaseDt);
-            log.info(getParamDataIds);
+            //log.info(getParamBaseDt);
+            //log.info(getParamDataIds);
         	// Validation Check (다음주 월요일 까지 완성하도록 하기)
         	String errorMsg = ""; //error message 빈 string에 error Message 내용을 추가해주도록 하기. 고로 error가 걸릴 경우, errorMsg string에 error 내용을 추가해주고, error내용을 retrun
         	//Exception 새로운 클래스를 짜서, Exception클래스 상속받아서 사용하는 것은 지양하도록 하기.
         	//illegalArgumentException학습해서 처리하기. Exception새로운 클래스를 만들어서 사용하지 말고, illegalArgumentException 사용하도록 하기.
         	//1. baseDt가 null인 경우
-            if (currentBaseDt == null || currentBaseDt.isEmpty()) {
+            if (currentBaseDt == null || currentBaseDt.trim().isEmpty()) {
                 throw new IllegalArgumentException("baseDt가 null이나 empty이다.");
             }
         	
         	//2. dataIds가 null인 경우
-            if (currentDataIds == null || currentDataIds.isEmpty()) {
+            if (currentDataIds == null || currentDataIds.trim().isEmpty()) {
                 throw new IllegalArgumentException("dataIds가 null이나 empty이다.");
             }
         	//3. 위에가 있어도 결과물이 없는 경우 (dataIds=빈 경우) <<위의 경우에 포함되어 있음.
@@ -74,12 +74,12 @@ public class ProcessYieldCurves2 {
 
                 JSONObject yieldObject = new JSONObject();
                 String tenorStr = result.getValue(i, "yields.tenor", "");
-                double tenorNum = Double.parseDouble(tenorStr);  // Converts string to double
-                yieldObject.put("tenor", tenorNum);  // Automatically uses numeric JSON representation
+                double tenorNum = Double.parseDouble(tenorStr);  // string을 double로 바꾼다.
+                yieldObject.put("tenor", tenorNum);  //
                 //yieldObject.put("tenor", result.getValue(i, "yields.tenor", ""));
                 
                 String rateStr = result.getValue(i, "yields.rate", "");
-                double rateNum = Double.parseDouble(rateStr);  // Converts string to double
+                double rateNum = Double.parseDouble(rateStr);  // 
                 yieldObject.put("rate", rateNum);
                 //yieldObject.put("rate", result.getValue(i, "yields.rate", ""));
 
@@ -115,7 +115,7 @@ public class ProcessYieldCurves2 {
         } catch (SQLServiceException e) {
             log.error("Error processing yield curves", e);
             dao.setError("Error processing yield curves: " + e.getMessage());
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {//IllegalArgumentException을 사용할 경우, 특정 error 메시지를 띄울 수 있다.
 			log.error("Validation error: " + e.getMessage(), e);
 			dao.setError(e.getMessage());
 		}
